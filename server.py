@@ -2,8 +2,8 @@ import json
 import os
 import threading
 
-from mcp.server.transport_security import TransportSecuritySettings
 from mcp.server.fastmcp import FastMCP
+from mcp.server.transport_security import TransportSecuritySettings
 from starlette.requests import Request
 from starlette.responses import FileResponse, JSONResponse
 
@@ -162,6 +162,8 @@ async def api_list_students(request: Request):
 @mcp.custom_route("/api/students", methods=["POST"])
 async def api_add_student(request: Request):
     payload = await request.json()
+    if not payload.get("student_id", "").strip():
+        return JSONResponse({"error": "Student ID cannot be empty"}, status_code=400)
     data = load_data()
     if find_student(data, payload["student_id"]):
         return JSONResponse({"error": "Student ID already exists"}, status_code=400)
@@ -204,6 +206,8 @@ async def api_list_drives(request: Request):
 @mcp.custom_route("/api/drives", methods=["POST"])
 async def api_add_drive(request: Request):
     payload = await request.json()
+    if not payload.get("company", "").strip():
+        return JSONResponse({"error": "Company name cannot be empty"}, status_code=400)
     data = load_data()
     if find_drive(data, payload["company"]):
         return JSONResponse({"error": "Drive already exists"}, status_code=400)

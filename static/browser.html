@@ -14,14 +14,14 @@
     <a href="/browser" data-path="/browser">Database</a>
     <a href="/connect" data-path="/connect">Connect AI</a>
   </nav>
- 
+
   <main class="main">
     <header>
       <span class="kicker">Records</span>
       <h1>Database</h1>
       <p>Every change here is saved immediately and reflected the next time an AI tool queries this server.</p>
     </header>
- 
+
     <div class="panel">
       <div class="top-row">
         <h3 style="margin: 0;">Students</h3>
@@ -34,7 +34,7 @@
         <tbody id="students-body"></tbody>
       </table>
     </div>
- 
+
     <div class="panel">
       <div class="top-row">
         <h3 style="margin: 0;">Placement drives</h3>
@@ -49,7 +49,7 @@
     </div>
   </main>
 </div>
- 
+
 <!-- Student modal -->
 <div class="modal-backdrop" id="student-modal">
   <div class="modal">
@@ -68,7 +68,7 @@
     </div>
   </div>
 </div>
- 
+
 <!-- Drive modal -->
 <div class="modal-backdrop" id="drive-modal">
   <div class="modal">
@@ -84,16 +84,16 @@
     </div>
   </div>
 </div>
- 
+
 <script src="/static/app.js"></script>
 <script>
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
- 
+
 function avgAttendance(att) {
   const vals = Object.values(att);
   return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) + '%';
 }
- 
+
 async function loadStudents() {
   const students = await api('/api/students');
   const body = document.getElementById('students-body');
@@ -110,7 +110,7 @@ async function loadStudents() {
       </td>
     </tr>`).join('');
 }
- 
+
 async function loadDrives() {
   const drives = await api('/api/drives');
   const body = document.getElementById('drives-body');
@@ -126,13 +126,13 @@ async function loadDrives() {
       </td>
     </tr>`).join('');
 }
- 
+
 function openStudentModal() {
   document.getElementById('student-modal-title').textContent = 'Add student';
   ['s-original-id','s-id','s-name','s-cgpa','s-backlogs','s-dbms','s-os','s-cn'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('student-modal').classList.add('open');
 }
- 
+
 function editStudent(s) {
   document.getElementById('student-modal-title').textContent = 'Edit student';
   document.getElementById('s-original-id').value = s.student_id;
@@ -145,11 +145,13 @@ function editStudent(s) {
   document.getElementById('s-cn').value = s.attendance.CN ?? '';
   document.getElementById('student-modal').classList.add('open');
 }
- 
+
 async function saveStudent() {
   const originalId = document.getElementById('s-original-id').value;
+  const newId = document.getElementById('s-id').value.trim();
+  if (!newId) { alert('Student ID is required.'); return; }
   const payload = {
-    student_id: document.getElementById('s-id').value.trim(),
+    student_id: newId,
     name: document.getElementById('s-name').value.trim(),
     cgpa: parseFloat(document.getElementById('s-cgpa').value),
     backlogs: parseInt(document.getElementById('s-backlogs').value || '0'),
@@ -167,19 +169,20 @@ async function saveStudent() {
   closeModal('student-modal');
   loadStudents();
 }
- 
+
 async function deleteStudent(id) {
+  if (!id) { alert('This row has no Student ID — edit it to set one, or reload the page and try again.'); return; }
   if (!confirm(`Delete student ${id}?`)) return;
   await api(`/api/students/${id}`, { method: 'DELETE' });
   loadStudents();
 }
- 
+
 function openDriveModal() {
   document.getElementById('drive-modal-title').textContent = 'Add drive';
   ['d-original-company','d-company','d-date','d-mincgpa','d-maxbacklogs'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('drive-modal').classList.add('open');
 }
- 
+
 function editDrive(d) {
   document.getElementById('drive-modal-title').textContent = 'Edit drive';
   document.getElementById('d-original-company').value = d.company;
@@ -189,11 +192,13 @@ function editDrive(d) {
   document.getElementById('d-maxbacklogs').value = d.max_backlogs;
   document.getElementById('drive-modal').classList.add('open');
 }
- 
+
 async function saveDrive() {
   const originalCompany = document.getElementById('d-original-company').value;
+  const newCompany = document.getElementById('d-company').value.trim();
+  if (!newCompany) { alert('Company name is required.'); return; }
   const payload = {
-    company: document.getElementById('d-company').value.trim(),
+    company: newCompany,
     date: document.getElementById('d-date').value.trim(),
     min_cgpa: parseFloat(document.getElementById('d-mincgpa').value),
     max_backlogs: parseInt(document.getElementById('d-maxbacklogs').value || '0'),
@@ -206,16 +211,15 @@ async function saveDrive() {
   closeModal('drive-modal');
   loadDrives();
 }
- 
+
 async function deleteDrive(company) {
   if (!confirm(`Delete the ${company} drive?`)) return;
   await api(`/api/drives/${encodeURIComponent(company)}`, { method: 'DELETE' });
   loadDrives();
 }
- 
+
 loadStudents();
 loadDrives();
 </script>
 </body>
 </html>
- 
