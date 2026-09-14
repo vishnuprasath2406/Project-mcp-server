@@ -1,5 +1,5 @@
 /**
- * StudConS - Application Script
+ * PlacePilot - Application Script
  * Modular interactions powered by Tailwind CSS & Alpine.js
  */
 
