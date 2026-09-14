@@ -2,6 +2,7 @@ import json
 import os
 import threading
 
+from mcp.server.transport_security import TransportSecuritySettings
 from mcp.server.fastmcp import FastMCP
 from starlette.requests import Request
 from starlette.responses import FileResponse, JSONResponse
@@ -12,7 +13,12 @@ STATIC_DIR = os.path.join(SCRIPT_DIR, "static")
 
 _lock = threading.Lock()
 
-mcp = FastMCP("project-mcp-server")
+mcp = FastMCP(
+    "project-mcp-server",
+    transport_security=TransportSecuritySettings(
+        enable_dns_rebinding_protection=False,
+    ),
+)
 
 
 # ---------- data helpers ----------
