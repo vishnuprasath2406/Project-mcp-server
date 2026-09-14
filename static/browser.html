@@ -1,225 +1,208 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" x-data="app()" :class="{'dark': dark}" class="scroll-smooth">
 <head>
-<meta charset="UTF-8">
-<title>Database — StudConS</title>
-<link rel="stylesheet" href="/static/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Browse and edit StudConS student records and placement drives.">
+  <title>Database — StudConS</title>
+
+  <link rel="stylesheet" href="/static/style.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="/static/app.js"></script>
 </head>
-<body>
-<div class="layout">
-  <nav class="sidebar">
-    <div class="brand">Stud<span>ConS</span></div>
-    <div class="tagline">Placement Console</div>
-    <a href="/" data-path="/">Dashboard</a>
-    <a href="/browser" data-path="/browser">Database</a>
-    <a href="/connect" data-path="/connect">Connect AI</a>
-  </nav>
 
-  <main class="main">
-    <header>
-      <span class="kicker">Records</span>
-      <h1>Database</h1>
-      <p>Every change here is saved immediately and reflected the next time an AI tool queries this server.</p>
-    </header>
+<body class="bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 antialiased selection:bg-accent selection:text-white">
 
-    <div class="panel">
-      <div class="top-row">
-        <h3 style="margin: 0;">Students</h3>
-        <button class="btn" onclick="openStudentModal()">Add student</button>
+  <!-- ═══ HEADER & NAVIGATION ═══ -->
+  <header class="fixed inset-x-0 top-0 z-50 transition-all duration-300"
+    :class="sc ? 'bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md shadow-sm shadow-black/5' : 'bg-transparent'">
+    <nav class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between" aria-label="Main navigation">
+
+      <a href="/" class="font-display font-bold text-2xl tracking-tight z-10">
+        <span class="text-zinc-900 dark:text-white">Stud</span><span class="text-accent">ConS</span>
+      </a>
+
+      <ul class="hidden md:flex items-center gap-8 text-sm" role="list">
+        <li><a href="/#services" class="nl text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors">What it does</a></li>
+        <li><a href="/browser" class="nl on text-accent font-semibold">Database</a></li>
+        <li><a href="/#snapshot" class="nl text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors">Live snapshot</a></li>
+        <li><a href="/connect" class="nl text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors">Connect AI</a></li>
+      </ul>
+
+      <div class="flex items-center gap-3">
+        <button @click="toggleTheme()" class="w-9 h-9 flex items-center justify-center rounded-full border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors" :aria-label="dark ? 'Light mode' : 'Dark mode'">
+          <svg x-show="!dark" class="w-4 h-4 text-zinc-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+          <svg x-show="dark" class="w-4 h-4 text-zinc-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
+        </button>
+
+        <a href="/connect" class="hidden md:inline-flex items-center gap-2 shimmer bg-accent text-white text-sm font-medium px-5 py-2 rounded-full hover:bg-accent-light transition-colors">
+          Connect AI &rarr;
+        </a>
+
+        <button @click="mm = !mm" class="md:hidden w-9 h-9 flex items-center justify-center rounded-full border border-zinc-200 dark:border-zinc-800" aria-label="Toggle menu">
+          <svg x-show="!mm" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          <svg x-show="mm" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
       </div>
-      <table>
-        <thead>
-          <tr><th>ID</th><th>Name</th><th>CGPA</th><th>Backlogs</th><th>Attendance (avg)</th><th></th></tr>
-        </thead>
-        <tbody id="students-body"></tbody>
-      </table>
+    </nav>
+
+    <div x-show="mm" x-cloak class="md:hidden bg-white dark:bg-zinc-950 border-t border-zinc-100 dark:border-zinc-900 px-6 py-5">
+      <ul class="flex flex-col gap-4 text-sm font-medium">
+        <li><a href="/#services" @click="mm=false" class="block text-zinc-700 dark:text-zinc-300">What it does</a></li>
+        <li><a href="/browser" @click="mm=false" class="block text-accent font-semibold">Database</a></li>
+        <li><a href="/connect" @click="mm=false" class="block text-zinc-700 dark:text-zinc-300">Connect AI</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- ═══ MAIN BROWSER CONTENT ═══ -->
+  <main x-data="studentBrowser()" class="pt-32 pb-24">
+
+    <!-- Header Section -->
+    <section class="max-w-6xl mx-auto px-6 mb-12">
+      <p class="text-xs font-medium text-accent tracking-widest uppercase mb-3">Records</p>
+      <h1 class="font-display font-bold text-4xl md:text-5xl lg:text-6xl text-zinc-900 dark:text-white leading-tight mb-4">
+        Database
+      </h1>
+      <p class="text-base md:text-lg text-zinc-500 dark:text-zinc-400 max-w-2xl leading-relaxed">
+        Every change here is saved immediately and reflected the next time an AI tool queries this server.
+      </p>
+
+      <!-- Tabs, Search, Add button -->
+      <div class="mt-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-100 dark:border-zinc-900 pb-6">
+        <div class="flex flex-wrap gap-2">
+          <button @click="tab = 'students'"
+            :class="tab === 'students' ? 'bg-accent text-white border-accent shadow-sm' : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:border-accent'"
+            class="text-xs md:text-sm font-medium px-4 py-2 rounded-full border transition-all">Students</button>
+          <button @click="tab = 'drives'"
+            :class="tab === 'drives' ? 'bg-accent text-white border-accent shadow-sm' : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:border-accent'"
+            class="text-xs md:text-sm font-medium px-4 py-2 rounded-full border transition-all">Placement drives</button>
+        </div>
+
+        <div class="flex items-center gap-3 w-full md:w-auto">
+          <div class="relative flex-1 md:w-64">
+            <input type="text" x-model="search" placeholder="Search..."
+              class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs rounded-full pl-9 pr-4 py-2.5 focus:outline-none focus:border-accent transition-colors placeholder-zinc-400">
+            <svg class="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </div>
+          <button x-show="tab === 'students'" @click="openAddStudent()" class="shimmer bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-xs md:text-sm font-medium px-4 py-2.5 rounded-full hover:bg-zinc-700 dark:hover:bg-zinc-200 transition-colors whitespace-nowrap">+ Add student</button>
+          <button x-show="tab === 'drives'" @click="openAddDrive()" class="shimmer bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-xs md:text-sm font-medium px-4 py-2.5 rounded-full hover:bg-zinc-700 dark:hover:bg-zinc-200 transition-colors whitespace-nowrap">+ Add drive</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Students Grid -->
+    <section x-show="tab === 'students'" class="max-w-6xl mx-auto px-6">
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <template x-for="s in filteredStudents" :key="s.student_id">
+          <article class="card-h group rounded-2xl overflow-hidden bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 hover:border-accent transition-all flex flex-col p-6">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-11 h-11 rounded-full bg-orange-50 dark:bg-zinc-800 text-accent font-display font-bold flex items-center justify-center text-sm" x-text="initials(s.name)"></div>
+              <div>
+                <h3 class="font-display font-bold text-base text-zinc-900 dark:text-white" x-text="s.name"></h3>
+                <p class="text-xs text-zinc-500 font-mono" x-text="s.student_id"></p>
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mb-4">
+              <span class="text-xs bg-orange-50 dark:bg-zinc-800 text-accent border border-orange-200 dark:border-zinc-700 px-2.5 py-1 rounded-full font-medium" x-text="'CGPA ' + s.cgpa"></span>
+              <span class="text-xs bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 px-2.5 py-1 rounded-full" x-text="s.backlogs + ' backlog' + (s.backlogs === 1 ? '' : 's')"></span>
+              <span class="text-xs bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 px-2.5 py-1 rounded-full" x-text="'Attendance ' + avgAttendance(s.attendance)"></span>
+            </div>
+            <div class="mt-auto flex gap-2 pt-2">
+              <button @click="openEditStudent(s)" class="flex-1 text-xs font-medium border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 px-3 py-2 rounded-full hover:border-accent transition-colors">Edit</button>
+              <button @click="deleteStudent(s.student_id)" class="flex-1 text-xs font-medium border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 px-3 py-2 rounded-full hover:border-red-400 hover:text-red-500 transition-colors">Delete</button>
+            </div>
+          </article>
+        </template>
+      </div>
+      <div x-show="!loading && filteredStudents.length === 0" x-cloak class="text-center py-20 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+        <p class="text-base text-zinc-500 dark:text-zinc-400 mb-3">No matching students found.</p>
+      </div>
+    </section>
+
+    <!-- Drives Grid -->
+    <section x-show="tab === 'drives'" x-cloak class="max-w-6xl mx-auto px-6">
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <template x-for="d in filteredDrives" :key="d.company">
+          <article class="card-h group rounded-2xl overflow-hidden bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 hover:border-accent transition-all flex flex-col p-6">
+            <h3 class="font-display font-bold text-lg text-zinc-900 dark:text-white mb-1" x-text="d.company"></h3>
+            <p class="text-xs text-zinc-500 mb-4" x-text="d.date"></p>
+            <div class="flex flex-wrap gap-1.5 mb-4">
+              <span class="text-xs bg-orange-50 dark:bg-zinc-800 text-accent border border-orange-200 dark:border-zinc-700 px-2.5 py-1 rounded-full font-medium" x-text="'min CGPA ' + d.min_cgpa"></span>
+              <span class="text-xs bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 px-2.5 py-1 rounded-full" x-text="'max ' + d.max_backlogs + ' backlogs'"></span>
+            </div>
+            <div class="mt-auto flex gap-2 pt-2">
+              <button @click="openEditDrive(d)" class="flex-1 text-xs font-medium border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 px-3 py-2 rounded-full hover:border-accent transition-colors">Edit</button>
+              <button @click="deleteDrive(d.company)" class="flex-1 text-xs font-medium border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 px-3 py-2 rounded-full hover:border-red-400 hover:text-red-500 transition-colors">Delete</button>
+            </div>
+          </article>
+        </template>
+      </div>
+      <div x-show="!loading && filteredDrives.length === 0" x-cloak class="text-center py-20 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+        <p class="text-base text-zinc-500 dark:text-zinc-400 mb-3">No matching drives found.</p>
+      </div>
+    </section>
+
+    <!-- Student Modal -->
+    <div x-show="modalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-zinc-900/60 backdrop-blur-sm" @click.self="modalOpen = false">
+      <div class="bg-white dark:bg-zinc-900 rounded-2xl p-7 w-full max-w-sm border border-zinc-100 dark:border-zinc-800 shadow-2xl">
+        <h3 class="font-display font-bold text-xl text-zinc-900 dark:text-white mb-5" x-text="modalMode === 'edit' ? 'Edit student' : 'Add student'"></h3>
+        <div class="space-y-3">
+          <div><label class="block text-xs text-zinc-500 mb-1">Student ID</label><input x-model="form.student_id" placeholder="CS103" class="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-accent"></div>
+          <div><label class="block text-xs text-zinc-500 mb-1">Name</label><input x-model="form.name" placeholder="Full name" class="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-accent"></div>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="block text-xs text-zinc-500 mb-1">CGPA</label><input x-model="form.cgpa" type="number" step="0.1" placeholder="8.0" class="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-accent"></div>
+            <div><label class="block text-xs text-zinc-500 mb-1">Backlogs</label><input x-model="form.backlogs" type="number" placeholder="0" class="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-accent"></div>
+          </div>
+          <div class="grid grid-cols-3 gap-3">
+            <div><label class="block text-xs text-zinc-500 mb-1">DBMS %</label><input x-model="form.dbms" type="number" placeholder="80" class="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-accent"></div>
+            <div><label class="block text-xs text-zinc-500 mb-1">OS %</label><input x-model="form.os" type="number" placeholder="80" class="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-accent"></div>
+            <div><label class="block text-xs text-zinc-500 mb-1">CN %</label><input x-model="form.cn" type="number" placeholder="80" class="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-accent"></div>
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 mt-6">
+          <button @click="modalOpen = false" class="text-sm font-medium border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 px-4 py-2 rounded-full">Cancel</button>
+          <button @click="saveStudent()" class="shimmer text-sm font-medium bg-accent text-white px-5 py-2 rounded-full hover:bg-accent-light transition-colors">Save</button>
+        </div>
+      </div>
     </div>
 
-    <div class="panel">
-      <div class="top-row">
-        <h3 style="margin: 0;">Placement drives</h3>
-        <button class="btn" onclick="openDriveModal()">Add drive</button>
+    <!-- Drive Modal -->
+    <div x-show="driveModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-zinc-900/60 backdrop-blur-sm" @click.self="driveModalOpen = false">
+      <div class="bg-white dark:bg-zinc-900 rounded-2xl p-7 w-full max-w-sm border border-zinc-100 dark:border-zinc-800 shadow-2xl">
+        <h3 class="font-display font-bold text-xl text-zinc-900 dark:text-white mb-5" x-text="driveModalMode === 'edit' ? 'Edit drive' : 'Add drive'"></h3>
+        <div class="space-y-3">
+          <div><label class="block text-xs text-zinc-500 mb-1">Company</label><input x-model="driveForm.company" placeholder="TCS" class="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-accent"></div>
+          <div><label class="block text-xs text-zinc-500 mb-1">Date</label><input x-model="driveForm.date" placeholder="2026-10-15" class="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-accent"></div>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="block text-xs text-zinc-500 mb-1">Min CGPA</label><input x-model="driveForm.min_cgpa" type="number" step="0.1" placeholder="7.0" class="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-accent"></div>
+            <div><label class="block text-xs text-zinc-500 mb-1">Max backlogs</label><input x-model="driveForm.max_backlogs" type="number" placeholder="0" class="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-accent"></div>
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 mt-6">
+          <button @click="driveModalOpen = false" class="text-sm font-medium border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 px-4 py-2 rounded-full">Cancel</button>
+          <button @click="saveDrive()" class="shimmer text-sm font-medium bg-accent text-white px-5 py-2 rounded-full hover:bg-accent-light transition-colors">Save</button>
+        </div>
       </div>
-      <table>
-        <thead>
-          <tr><th>Company</th><th>Date</th><th>Min CGPA</th><th>Max backlogs</th><th></th></tr>
-        </thead>
-        <tbody id="drives-body"></tbody>
-      </table>
     </div>
+
   </main>
-</div>
 
-<!-- Student modal -->
-<div class="modal-backdrop" id="student-modal">
-  <div class="modal">
-    <h3 id="student-modal-title">Add student</h3>
-    <input type="hidden" id="s-original-id">
-    <div class="field"><label>Student ID</label><input id="s-id" placeholder="CS103"></div>
-    <div class="field"><label>Name</label><input id="s-name" placeholder="Full name"></div>
-    <div class="field"><label>CGPA</label><input id="s-cgpa" type="number" step="0.1" placeholder="8.0"></div>
-    <div class="field"><label>Backlogs</label><input id="s-backlogs" type="number" placeholder="0"></div>
-    <div class="field"><label>DBMS attendance %</label><input id="s-dbms" type="number" placeholder="80"></div>
-    <div class="field"><label>OS attendance %</label><input id="s-os" type="number" placeholder="80"></div>
-    <div class="field"><label>CN attendance %</label><input id="s-cn" type="number" placeholder="80"></div>
-    <div class="modal-actions">
-      <button class="btn secondary" onclick="closeModal('student-modal')">Cancel</button>
-      <button class="btn" onclick="saveStudent()">Save</button>
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="border-t border-zinc-100 dark:border-zinc-900">
+    <div class="max-w-6xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p class="text-sm text-zinc-400">&copy; <span id="year"></span> StudConS.</p>
+      <p class="text-xs text-zinc-500">Tailwind CSS &amp; Alpine.js</p>
     </div>
-  </div>
-</div>
+  </footer>
 
-<!-- Drive modal -->
-<div class="modal-backdrop" id="drive-modal">
-  <div class="modal">
-    <h3 id="drive-modal-title">Add drive</h3>
-    <input type="hidden" id="d-original-company">
-    <div class="field"><label>Company</label><input id="d-company" placeholder="TCS"></div>
-    <div class="field"><label>Date</label><input id="d-date" placeholder="2026-10-15"></div>
-    <div class="field"><label>Min CGPA</label><input id="d-mincgpa" type="number" step="0.1" placeholder="7.0"></div>
-    <div class="field"><label>Max backlogs</label><input id="d-maxbacklogs" type="number" placeholder="0"></div>
-    <div class="modal-actions">
-      <button class="btn secondary" onclick="closeModal('drive-modal')">Cancel</button>
-      <button class="btn" onclick="saveDrive()">Save</button>
-    </div>
-  </div>
-</div>
-
-<script src="/static/app.js"></script>
-<script>
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-
-function avgAttendance(att) {
-  const vals = Object.values(att);
-  return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) + '%';
-}
-
-async function loadStudents() {
-  const students = await api('/api/students');
-  const body = document.getElementById('students-body');
-  body.innerHTML = students.map(s => `
-    <tr>
-      <td class="mono">${s.student_id}</td>
-      <td>${s.name}</td>
-      <td>${s.cgpa}</td>
-      <td>${s.backlogs}</td>
-      <td>${avgAttendance(s.attendance)}</td>
-      <td>
-        <button class="icon-btn" onclick='editStudent(${JSON.stringify(s)})'>Edit</button>
-        <button class="icon-btn" onclick="deleteStudent('${s.student_id}')">Delete</button>
-      </td>
-    </tr>`).join('');
-}
-
-async function loadDrives() {
-  const drives = await api('/api/drives');
-  const body = document.getElementById('drives-body');
-  body.innerHTML = drives.map(d => `
-    <tr>
-      <td>${d.company}</td>
-      <td>${d.date}</td>
-      <td>${d.min_cgpa}</td>
-      <td>${d.max_backlogs}</td>
-      <td>
-        <button class="icon-btn" onclick='editDrive(${JSON.stringify(d)})'>Edit</button>
-        <button class="icon-btn" onclick="deleteDrive('${d.company}')">Delete</button>
-      </td>
-    </tr>`).join('');
-}
-
-function openStudentModal() {
-  document.getElementById('student-modal-title').textContent = 'Add student';
-  ['s-original-id','s-id','s-name','s-cgpa','s-backlogs','s-dbms','s-os','s-cn'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('student-modal').classList.add('open');
-}
-
-function editStudent(s) {
-  document.getElementById('student-modal-title').textContent = 'Edit student';
-  document.getElementById('s-original-id').value = s.student_id;
-  document.getElementById('s-id').value = s.student_id;
-  document.getElementById('s-name').value = s.name;
-  document.getElementById('s-cgpa').value = s.cgpa;
-  document.getElementById('s-backlogs').value = s.backlogs;
-  document.getElementById('s-dbms').value = s.attendance.DBMS ?? '';
-  document.getElementById('s-os').value = s.attendance.OS ?? '';
-  document.getElementById('s-cn').value = s.attendance.CN ?? '';
-  document.getElementById('student-modal').classList.add('open');
-}
-
-async function saveStudent() {
-  const originalId = document.getElementById('s-original-id').value;
-  const newId = document.getElementById('s-id').value.trim();
-  if (!newId) { alert('Student ID is required.'); return; }
-  const payload = {
-    student_id: newId,
-    name: document.getElementById('s-name').value.trim(),
-    cgpa: parseFloat(document.getElementById('s-cgpa').value),
-    backlogs: parseInt(document.getElementById('s-backlogs').value || '0'),
-    attendance: {
-      DBMS: parseInt(document.getElementById('s-dbms').value || '0'),
-      OS: parseInt(document.getElementById('s-os').value || '0'),
-      CN: parseInt(document.getElementById('s-cn').value || '0'),
-    },
-  };
-  if (originalId) {
-    await api(`/api/students/${originalId}`, { method: 'PUT', body: JSON.stringify(payload) });
-  } else {
-    await api('/api/students', { method: 'POST', body: JSON.stringify(payload) });
-  }
-  closeModal('student-modal');
-  loadStudents();
-}
-
-async function deleteStudent(id) {
-  if (!id) { alert('This row has no Student ID — edit it to set one, or reload the page and try again.'); return; }
-  if (!confirm(`Delete student ${id}?`)) return;
-  await api(`/api/students/${id}`, { method: 'DELETE' });
-  loadStudents();
-}
-
-function openDriveModal() {
-  document.getElementById('drive-modal-title').textContent = 'Add drive';
-  ['d-original-company','d-company','d-date','d-mincgpa','d-maxbacklogs'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('drive-modal').classList.add('open');
-}
-
-function editDrive(d) {
-  document.getElementById('drive-modal-title').textContent = 'Edit drive';
-  document.getElementById('d-original-company').value = d.company;
-  document.getElementById('d-company').value = d.company;
-  document.getElementById('d-date').value = d.date;
-  document.getElementById('d-mincgpa').value = d.min_cgpa;
-  document.getElementById('d-maxbacklogs').value = d.max_backlogs;
-  document.getElementById('drive-modal').classList.add('open');
-}
-
-async function saveDrive() {
-  const originalCompany = document.getElementById('d-original-company').value;
-  const newCompany = document.getElementById('d-company').value.trim();
-  if (!newCompany) { alert('Company name is required.'); return; }
-  const payload = {
-    company: newCompany,
-    date: document.getElementById('d-date').value.trim(),
-    min_cgpa: parseFloat(document.getElementById('d-mincgpa').value),
-    max_backlogs: parseInt(document.getElementById('d-maxbacklogs').value || '0'),
-  };
-  if (originalCompany) {
-    await api(`/api/drives/${encodeURIComponent(originalCompany)}`, { method: 'PUT', body: JSON.stringify(payload) });
-  } else {
-    await api('/api/drives', { method: 'POST', body: JSON.stringify(payload) });
-  }
-  closeModal('drive-modal');
-  loadDrives();
-}
-
-async function deleteDrive(company) {
-  if (!confirm(`Delete the ${company} drive?`)) return;
-  await api(`/api/drives/${encodeURIComponent(company)}`, { method: 'DELETE' });
-  loadDrives();
-}
-
-loadStudents();
-loadDrives();
-</script>
 </body>
 </html>
