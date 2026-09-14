@@ -6,6 +6,17 @@
   <meta name="description" content="Browse and edit StudConS student records and placement drives.">
   <title>Database — StudConS</title>
 
+  <!-- Anti-flicker: apply dark mode BEFORE Tailwind/Alpine load, so there's no flash -->
+  <script>
+    (function () {
+      var stored = localStorage.getItem('dark');
+      var isDark = stored === null
+        ? window.matchMedia('(prefers-color-scheme: dark)').matches
+        : stored === 'true';
+      if (isDark) document.documentElement.classList.add('dark');
+    })();
+  </script>
+
   <link rel="stylesheet" href="/static/style.css">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
