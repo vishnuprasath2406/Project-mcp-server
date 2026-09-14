@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Connect — Placement Console</title>
+<title>Connect — StudConS</title>
 <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 <div class="layout">
   <nav class="sidebar">
-    <div class="brand">Placement<span>Console</span></div>
+    <div class="brand">Stud<span>ConS</span></div>
+    <div class="tagline">Placement Console</div>
     <a href="/" data-path="/">Dashboard</a>
     <a href="/browser" data-path="/browser">Database</a>
     <a href="/connect" data-path="/connect">Connect AI</a>
@@ -16,8 +17,9 @@
 
   <main class="main">
     <header>
+      <span class="kicker">MCP endpoint</span>
       <h1>Connect an AI tool</h1>
-      <p>This server speaks MCP over HTTP, so any MCP-compatible AI assistant can query it directly — no code required on your end.</p>
+      <p>StudConS speaks MCP over HTTP, so any MCP-compatible AI assistant can query it directly — no code required on your end.</p>
     </header>
 
     <div class="panel">
@@ -32,10 +34,10 @@
     <div class="panel">
       <h3>Claude (claude.ai / Claude Desktop)</h3>
       <ol class="step-list">
-        <li>Go to <b>Settings → Connectors</b></li>
-        <li>Click <b>Add custom connector</b></li>
-        <li>Paste the server URL above and save</li>
-        <li>Ask Claude something like <i>"What's the attendance for CS101?"</i></li>
+        <li>Open the toolbox icon in the sidebar, then <b>Customize → Connectors</b></li>
+        <li>Click <b>+</b>, then <b>Add custom connector</b></li>
+        <li>Paste the server URL above and click Add</li>
+        <li>Enable it for your chat from the <b>+</b> menu, then ask Claude something like <i>"What's the attendance for CS101?"</i></li>
       </ol>
     </div>
 

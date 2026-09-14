@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Placement Console</title>
+<title>StudConS — Placement Console</title>
 <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 <div class="layout">
   <nav class="sidebar">
-    <div class="brand">Placement<span>Console</span></div>
+    <div class="brand">Stud<span>ConS</span></div>
+    <div class="tagline">Placement Console</div>
     <a href="/" data-path="/">Dashboard</a>
     <a href="/browser" data-path="/browser">Database</a>
     <a href="/connect" data-path="/connect">Connect AI</a>
@@ -16,8 +17,9 @@
 
   <main class="main">
     <header>
-      <h1>Placement Console</h1>
-      <p>A live view of student records and placement drives, editable here and queryable by any connected AI tool through MCP.</p>
+      <span class="kicker">Live student records</span>
+      <h1>A single source of truth for placement data</h1>
+      <p>Attendance, CGPA, and placement eligibility, kept in one place — editable here, and queryable in plain language by any connected AI assistant.</p>
     </header>
 
     <div class="stat-grid" id="stats">
@@ -28,10 +30,10 @@
     </div>
 
     <div class="panel">
-      <h3 style="margin-bottom: 6px;">What this is</h3>
-      <p style="color: var(--text-muted); margin: 0 0 16px 0;">Student attendance, CGPA, and placement eligibility, stored in one place. Edit records in the <a href="/browser" style="color: var(--accent);">Database</a> tab, or point an AI assistant at the <a href="/connect" style="color: var(--accent);">Connect</a> tab to query it in plain language.</p>
+      <h3 style="margin-bottom: 8px;">What StudConS does</h3>
+      <p style="color: var(--text-muted); margin: 0 0 20px 0;">Edit student records directly in the <a href="/browser" style="color: var(--accent); font-weight: 600;">Database</a> tab — no spreadsheets, no manual file edits. Or point an AI assistant at the <a href="/connect" style="color: var(--accent); font-weight: 600;">Connect</a> tab and ask it questions about attendance, CGPA, or eligibility directly.</p>
       <a href="/browser" class="btn">Open database</a>
-      <a href="/connect" class="btn secondary" style="margin-left: 8px;">Connect an AI tool</a>
+      <a href="/connect" class="btn secondary" style="margin-left: 10px;">Connect an AI tool</a>
     </div>
   </main>
 </div>
