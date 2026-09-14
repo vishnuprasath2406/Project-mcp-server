@@ -1,0 +1,64 @@
+{
+  "students": [
+    {
+      "student_id": "CS101",
+      "name": "Sekar",
+      "cgpa": 8.2,
+      "backlogs": 0,
+      "attendance": {
+        "DBMS": 78,
+        "OS": 85,
+        "CN": 92
+      },
+      "results": {
+        "sem5": {
+          "DBMS": "A",
+          "OS": "A+",
+          "CN": "B+"
+        },
+        "sem6": {
+          "DBMS": "A+",
+          "OS": "A",
+          "CN": "A"
+        }
+      }
+    },
+    {
+      "student_id": "CS102",
+      "name": "Kumar",
+      "cgpa": 7.5,
+      "backlogs": 1,
+      "attendance": {
+        "DBMS": 65,
+        "OS": 72,
+        "CN": 80
+      },
+      "results": {
+        "sem5": {
+          "DBMS": "B",
+          "OS": "B+",
+          "CN": "A"
+        },
+        "sem6": {
+          "DBMS": "C",
+          "OS": "B",
+          "CN": "B+"
+        }
+      }
+    }
+  ],
+  "placement_drives": [
+    {
+      "company": "TCS",
+      "min_cgpa": 7.0,
+      "max_backlogs": 0,
+      "date": "2026-10-15"
+    },
+    {
+      "company": "Infosys",
+      "min_cgpa": 6.5,
+      "max_backlogs": 1,
+      "date": "2026-10-20"
+    }
+  ]
+}

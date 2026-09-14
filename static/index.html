@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Placement Console</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar">
+    <div class="brand">Placement<span>Console</span></div>
+    <a href="/" data-path="/">Dashboard</a>
+    <a href="/browser" data-path="/browser">Database</a>
+    <a href="/connect" data-path="/connect">Connect AI</a>
+  </nav>
+
+  <main class="main">
+    <header>
+      <h1>Placement Console</h1>
+      <p>A live view of student records and placement drives, editable here and queryable by any connected AI tool through MCP.</p>
+    </header>
+
+    <div class="stat-grid" id="stats">
+      <div class="stat-card"><div class="num">—</div><div class="label">Students</div></div>
+      <div class="stat-card"><div class="num">—</div><div class="label">Placement drives</div></div>
+      <div class="stat-card"><div class="num">—</div><div class="label">Avg. CGPA</div></div>
+      <div class="stat-card"><div class="num">—</div><div class="label">Open backlogs</div></div>
+    </div>
+
+    <div class="panel">
+      <h3 style="margin-bottom: 6px;">What this is</h3>
+      <p style="color: var(--text-muted); margin: 0 0 16px 0;">Student attendance, CGPA, and placement eligibility, stored in one place. Edit records in the <a href="/browser" style="color: var(--accent);">Database</a> tab, or point an AI assistant at the <a href="/connect" style="color: var(--accent);">Connect</a> tab to query it in plain language.</p>
+      <a href="/browser" class="btn">Open database</a>
+      <a href="/connect" class="btn secondary" style="margin-left: 8px;">Connect an AI tool</a>
+    </div>
+  </main>
+</div>
+
+<script src="/static/app.js"></script>
+<script>
+  api('/api/stats').then((s) => {
+    const cards = document.querySelectorAll('#stats .stat-card .num');
+    cards[0].textContent = s.student_count;
+    cards[1].textContent = s.drive_count;
+    cards[2].textContent = s.avg_cgpa;
+    cards[3].textContent = s.total_backlogs;
+  }).catch(() => {});
+</script>
+</body>
+</html>

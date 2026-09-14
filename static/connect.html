@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Connect — Placement Console</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar">
+    <div class="brand">Placement<span>Console</span></div>
+    <a href="/" data-path="/">Dashboard</a>
+    <a href="/browser" data-path="/browser">Database</a>
+    <a href="/connect" data-path="/connect">Connect AI</a>
+  </nav>
+
+  <main class="main">
+    <header>
+      <h1>Connect an AI tool</h1>
+      <p>This server speaks MCP over HTTP, so any MCP-compatible AI assistant can query it directly — no code required on your end.</p>
+    </header>
+
+    <div class="panel">
+      <h3>Server URL</h3>
+      <p style="color: var(--text-muted); margin-top: -6px;">Copy this and add it as a remote connector.</p>
+      <div class="code-block" id="url-block">
+        <button class="btn secondary copy-btn" onclick="copyText(document.getElementById('mcp-url').textContent, this)">Copy</button>
+        <span id="mcp-url"></span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Claude (claude.ai / Claude Desktop)</h3>
+      <ol class="step-list">
+        <li>Go to <b>Settings → Connectors</b></li>
+        <li>Click <b>Add custom connector</b></li>
+        <li>Paste the server URL above and save</li>
+        <li>Ask Claude something like <i>"What's the attendance for CS101?"</i></li>
+      </ol>
+    </div>
+
+    <div class="panel">
+      <h3>Other MCP-compatible tools</h3>
+      <p style="color: var(--text-muted); margin: 0;">Any client that supports the MCP streamable-HTTP transport (IDEs, agent frameworks, custom apps) can connect using the same URL — no separate setup needed on this end.</p>
+    </div>
+
+    <div class="panel">
+      <h3>Available tools</h3>
+      <table>
+        <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">get_attendance</td><td>Subject-wise attendance for a student</td></tr>
+          <tr><td class="mono">get_cgpa</td><td>CGPA and backlog count for a student</td></tr>
+          <tr><td class="mono">check_eligibility</td><td>Whether a student qualifies for a company's drive</td></tr>
+          <tr><td class="mono">list_placement_drives</td><td>All upcoming drives and their criteria</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<script src="/static/app.js"></script>
+<script>
+  document.getElementById('mcp-url').textContent = window.location.origin + '/mcp';
+</script>
+</body>
+</html>

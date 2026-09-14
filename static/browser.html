@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Database — Placement Console</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar">
+    <div class="brand">Placement<span>Console</span></div>
+    <a href="/" data-path="/">Dashboard</a>
+    <a href="/browser" data-path="/browser">Database</a>
+    <a href="/connect" data-path="/connect">Connect AI</a>
+  </nav>
+
+  <main class="main">
+    <header>
+      <h1>Database</h1>
+      <p>Every change here is saved immediately and reflected the next time an AI tool queries this server.</p>
+    </header>
+
+    <div class="panel">
+      <div class="top-row">
+        <h3 style="margin: 0;">Students</h3>
+        <button class="btn" onclick="openStudentModal()">Add student</button>
+      </div>
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Name</th><th>CGPA</th><th>Backlogs</th><th>Attendance (avg)</th><th></th></tr>
+        </thead>
+        <tbody id="students-body"></tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <div class="top-row">
+        <h3 style="margin: 0;">Placement drives</h3>
+        <button class="btn" onclick="openDriveModal()">Add drive</button>
+      </div>
+      <table>
+        <thead>
+          <tr><th>Company</th><th>Date</th><th>Min CGPA</th><th>Max backlogs</th><th></th></tr>
+        </thead>
+        <tbody id="drives-body"></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<!-- Student modal -->
+<div class="modal-backdrop" id="student-modal">
+  <div class="modal">
+    <h3 id="student-modal-title">Add student</h3>
+    <input type="hidden" id="s-original-id">
+    <div class="field"><label>Student ID</label><input id="s-id" placeholder="CS103"></div>
+    <div class="field"><label>Name</label><input id="s-name" placeholder="Full name"></div>
+    <div class="field"><label>CGPA</label><input id="s-cgpa" type="number" step="0.1" placeholder="8.0"></div>
+    <div class="field"><label>Backlogs</label><input id="s-backlogs" type="number" placeholder="0"></div>
+    <div class="field"><label>DBMS attendance %</label><input id="s-dbms" type="number" placeholder="80"></div>
+    <div class="field"><label>OS attendance %</label><input id="s-os" type="number" placeholder="80"></div>
+    <div class="field"><label>CN attendance %</label><input id="s-cn" type="number" placeholder="80"></div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeModal('student-modal')">Cancel</button>
+      <button class="btn" onclick="saveStudent()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Drive modal -->
+<div class="modal-backdrop" id="drive-modal">
+  <div class="modal">
+    <h3 id="drive-modal-title">Add drive</h3>
+    <input type="hidden" id="d-original-company">
+    <div class="field"><label>Company</label><input id="d-company" placeholder="TCS"></div>
+    <div class="field"><label>Date</label><input id="d-date" placeholder="2026-10-15"></div>
+    <div class="field"><label>Min CGPA</label><input id="d-mincgpa" type="number" step="0.1" placeholder="7.0"></div>
+    <div class="field"><label>Max backlogs</label><input id="d-maxbacklogs" type="number" placeholder="0"></div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeModal('drive-modal')">Cancel</button>
+      <button class="btn" onclick="saveDrive()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="/static/app.js"></script>
+<script>
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function avgAttendance(att) {
+  const vals = Object.values(att);
+  return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) + '%';
+}
+
+async function loadStudents() {
+  const students = await api('/api/students');
+  const body = document.getElementById('students-body');
+  body.innerHTML = students.map(s => `
+    <tr>
+      <td class="mono">${s.student_id}</td>
+      <td>${s.name}</td>
+      <td>${s.cgpa}</td>
+      <td>${s.backlogs}</td>
+      <td>${avgAttendance(s.attendance)}</td>
+      <td>
+        <button class="icon-btn" onclick='editStudent(${JSON.stringify(s)})'>Edit</button>
+        <button class="icon-btn" onclick="deleteStudent('${s.student_id}')">Delete</button>
+      </td>
+    </tr>`).join('');
+}
+
+async function loadDrives() {
+  const drives = await api('/api/drives');
+  const body = document.getElementById('drives-body');
+  body.innerHTML = drives.map(d => `
+    <tr>
+      <td>${d.company}</td>
+      <td>${d.date}</td>
+      <td>${d.min_cgpa}</td>
+      <td>${d.max_backlogs}</td>
+      <td>
+        <button class="icon-btn" onclick='editDrive(${JSON.stringify(d)})'>Edit</button>
+        <button class="icon-btn" onclick="deleteDrive('${d.company}')">Delete</button>
+      </td>
+    </tr>`).join('');
+}
+
+function openStudentModal() {
+  document.getElementById('student-modal-title').textContent = 'Add student';
+  ['s-original-id','s-id','s-name','s-cgpa','s-backlogs','s-dbms','s-os','s-cn'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('student-modal').classList.add('open');
+}
+
+function editStudent(s) {
+  document.getElementById('student-modal-title').textContent = 'Edit student';
+  document.getElementById('s-original-id').value = s.student_id;
+  document.getElementById('s-id').value = s.student_id;
+  document.getElementById('s-name').value = s.name;
+  document.getElementById('s-cgpa').value = s.cgpa;
+  document.getElementById('s-backlogs').value = s.backlogs;
+  document.getElementById('s-dbms').value = s.attendance.DBMS ?? '';
+  document.getElementById('s-os').value = s.attendance.OS ?? '';
+  document.getElementById('s-cn').value = s.attendance.CN ?? '';
+  document.getElementById('student-modal').classList.add('open');
+}
+
+async function saveStudent() {
+  const originalId = document.getElementById('s-original-id').value;
+  const payload = {
+    student_id: document.getElementById('s-id').value.trim(),
+    name: document.getElementById('s-name').value.trim(),
+    cgpa: parseFloat(document.getElementById('s-cgpa').value),
+    backlogs: parseInt(document.getElementById('s-backlogs').value || '0'),
+    attendance: {
+      DBMS: parseInt(document.getElementById('s-dbms').value || '0'),
+      OS: parseInt(document.getElementById('s-os').value || '0'),
+      CN: parseInt(document.getElementById('s-cn').value || '0'),
+    },
+  };
+  if (originalId) {
+    await api(`/api/students/${originalId}`, { method: 'PUT', body: JSON.stringify(payload) });
+  } else {
+    await api('/api/students', { method: 'POST', body: JSON.stringify(payload) });
+  }
+  closeModal('student-modal');
+  loadStudents();
+}
+
+async function deleteStudent(id) {
+  if (!confirm(`Delete student ${id}?`)) return;
+  await api(`/api/students/${id}`, { method: 'DELETE' });
+  loadStudents();
+}
+
+function openDriveModal() {
+  document.getElementById('drive-modal-title').textContent = 'Add drive';
+  ['d-original-company','d-company','d-date','d-mincgpa','d-maxbacklogs'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('drive-modal').classList.add('open');
+}
+
+function editDrive(d) {
+  document.getElementById('drive-modal-title').textContent = 'Edit drive';
+  document.getElementById('d-original-company').value = d.company;
+  document.getElementById('d-company').value = d.company;
+  document.getElementById('d-date').value = d.date;
+  document.getElementById('d-mincgpa').value = d.min_cgpa;
+  document.getElementById('d-maxbacklogs').value = d.max_backlogs;
+  document.getElementById('drive-modal').classList.add('open');
+}
+
+async function saveDrive() {
+  const originalCompany = document.getElementById('d-original-company').value;
+  const payload = {
+    company: document.getElementById('d-company').value.trim(),
+    date: document.getElementById('d-date').value.trim(),
+    min_cgpa: parseFloat(document.getElementById('d-mincgpa').value),
+    max_backlogs: parseInt(document.getElementById('d-maxbacklogs').value || '0'),
+  };
+  if (originalCompany) {
+    await api(`/api/drives/${encodeURIComponent(originalCompany)}`, { method: 'PUT', body: JSON.stringify(payload) });
+  } else {
+    await api('/api/drives', { method: 'POST', body: JSON.stringify(payload) });
+  }
+  closeModal('drive-modal');
+  loadDrives();
+}
+
+async function deleteDrive(company) {
+  if (!confirm(`Delete the ${company} drive?`)) return;
+  await api(`/api/drives/${encodeURIComponent(company)}`, { method: 'DELETE' });
+  loadDrives();
+}
+
+loadStudents();
+loadDrives();
+</script>
+</body>
+</html>
